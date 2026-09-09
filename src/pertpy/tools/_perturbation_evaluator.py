@@ -251,7 +251,12 @@ class PerturbationEvaluator:
                 scores[metric] = (np.nan, "nonfinite_result")
                 continue
             if metric == "delta_pearson":
-                a, b = actual - actual.mean(), estimated - estimated.mean()
+                # Correlation is invariant to positive rescaling. Scale before
+                # centering to avoid overflow in otherwise finite deltas/norms.
+                a_scale, b_scale = np.abs(actual).max(), np.abs(estimated).max()
+                a = actual / a_scale if a_scale > 0 else actual
+                b = estimated / b_scale if b_scale > 0 else estimated
+                a, b = a - a.mean(), b - b.mean()
                 denominator = np.linalg.norm(a) * np.linalg.norm(b)
                 scores[metric] = (
                     (float(np.clip(np.dot(a, b) / denominator, -1, 1)), "ok")
