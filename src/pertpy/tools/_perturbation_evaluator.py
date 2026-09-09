@@ -8,13 +8,15 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-from pertpy._types import cast_frame
+from pertpy._types import cast_frame, cast_matrix
 from pertpy.tools._distances._distances import Distance
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from anndata import AnnData
+
+    from pertpy._types import CSBase
 
 Metric = Literal["mse", "edistance", "delta_pearson", "direction_accuracy", "top_k_overlap"]
 Baseline = Literal["control_mean", "additive"]
@@ -90,7 +92,7 @@ class PerturbationEvaluator:
             groups.setdefault(row, []).append(pos)
         return {key: np.asarray(groups[key], dtype=int) for key in sorted(groups)}
 
-    def _matrix(self, adata: AnnData, features: pd.Index) -> np.ndarray | sparse.spmatrix | sparse.sparray:
+    def _matrix(self, adata: AnnData, features: pd.Index) -> np.ndarray | CSBase:
         if len(features) != adata.n_vars or set(features) != set(adata.var_names):
             raise ValueError("Inputs must have exactly the same feature identifiers; align or select them explicitly.")
         if self.layer_key is None:
@@ -101,13 +103,16 @@ class PerturbationEvaluator:
             matrix = adata.layers[self.layer_key]
         if not isinstance(matrix, np.ndarray) and not sparse.issparse(matrix):
             raise TypeError("Use an in-memory NumPy or SciPy sparse matrix; load backed or lazy data explicitly.")
+        matrix = cast_matrix(matrix)
         if matrix.dtype.kind not in "biuf":
             raise ValueError("Measurements must be real numeric values.")
-        values = matrix.data if sparse.issparse(matrix) else matrix
+        if isinstance(matrix, np.ndarray):
+            values = matrix
+        else:
+            matrix = matrix.tocsr()
+            values = matrix.data
         if not np.isfinite(values).all():
             raise ValueError("Measurements must be finite; missing values are not biological zeros.")
-        if sparse.issparse(matrix):
-            matrix = matrix.tocsr()
         return matrix[:, adata.var_names.get_indexer(features)]
 
     def split(
@@ -206,7 +211,7 @@ class PerturbationEvaluator:
         control_group = (*group[:-1], self.control)
         if control_group not in train_groups:
             return None, "missing_training_control"
-        control_mean = np.asarray(train_matrix[train_groups[control_group]].mean(axis=0, dtype=np.float64)).reshape(
+        control_mean = np.asarray(train_matrix[train_groups[control_group]].astype(np.float64).mean(axis=0)).reshape(
             1, -1
         )
         if name == "control_mean":
@@ -220,7 +225,8 @@ class PerturbationEvaluator:
         prediction = control_mean.copy()
         for key in component_groups:
             prediction += (
-                np.asarray(train_matrix[train_groups[key]].mean(axis=0, dtype=np.float64)).reshape(1, -1) - control_mean
+                np.asarray(train_matrix[train_groups[key]].astype(np.float64).mean(axis=0)).reshape(1, -1)
+                - control_mean
             )
         if not np.isfinite(prediction).all():
             return None, "nonfinite_baseline"
@@ -374,7 +380,9 @@ class PerturbationEvaluator:
             control_group = (*group[:-1], self.control)
             reference, reference_source = None, "unavailable"
             if control_group in train_groups:
-                reference = np.asarray(train_matrix[train_groups[control_group]].mean(axis=0, dtype=np.float64)).ravel()
+                reference = np.asarray(
+                    train_matrix[train_groups[control_group]].astype(np.float64).mean(axis=0)
+                ).ravel()
                 reference_source = "train_control"
             scopes = {"all": np.arange(len(features))}
             if feature_sets is not None and group in feature_sets:
