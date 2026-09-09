@@ -7,6 +7,7 @@ from pertpy.tools._distances._distance_tests import DistanceTest
 from pertpy.tools._distances._distances import Distance
 from pertpy.tools._enrichment import Enrichment
 from pertpy.tools._milo import Milo
+from pertpy.tools._perturbation_evaluator import PerturbationEvaluator
 from pertpy.tools._perturbation_efficacy._mixscale import Mixscale
 from pertpy.tools._perturbation_efficacy._mixscape import Mixscape
 from pertpy.tools._perturbation_space._clustering import ClusteringSpace
@@ -75,6 +76,7 @@ __all__ = [
     "Mixscale",
     "ClusteringSpace",
     "PerturbationComparison",
+    "PerturbationEvaluator",
     "LRClassifierSpace",
     "MLPClassifierSpace",
     "CentroidSpace",
