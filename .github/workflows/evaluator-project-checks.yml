@@ -1,0 +1,79 @@
+name: Evaluator project checks
+
+on:
+  push:
+    branches: [audit/perturbation-evaluator]
+    paths: [.github/workflows/evaluator-project-checks.yml]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  project:
+    if: github.repository == 'thantiklermcirony/pertpy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPLBACKEND: Agg
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          submodules: recursive
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          python-version: '3.12'
+      - name: Assemble only the five contribution files over upstream
+        run: |
+          git worktree add --detach /tmp/pertpy-contribution 5bf4acaa45af16b49d248e4986fe394344fafdf5
+          for file in src/pertpy/tools/__init__.py src/pertpy/tools/_perturbation_evaluator.py tests/tools/test_perturbation_evaluator.py docs/perturbation_evaluation.md docs/api/tools_index.md; do
+            cp "$file" "/tmp/pertpy-contribution/$file"
+          done
+          git -C /tmp/pertpy-contribution add src/pertpy/tools/__init__.py src/pertpy/tools/_perturbation_evaluator.py tests/tools/test_perturbation_evaluator.py docs/perturbation_evaluation.md docs/api/tools_index.md
+          git -C /tmp/pertpy-contribution submodule update --init --recursive
+          mkdir -p project-results
+          git rev-parse HEAD > project-results/audit-source-commit.txt
+      - name: Install the declared developer and documentation environment
+        id: install
+        working-directory: /tmp/pertpy-contribution
+        run: uv sync --extra dev --extra de --extra jax --extra tcoda --extra test --extra doc
+      - name: Whole-project type check
+        id: types
+        working-directory: /tmp/pertpy-contribution
+        run: |
+          uv run mypy src/pertpy tests 2>&1 | tee "$GITHUB_WORKSPACE/project-results/mypy.txt"
+      - name: Required pre-commit hooks on contribution files
+        if: always() && steps.install.outcome == 'success'
+        working-directory: /tmp/pertpy-contribution
+        env:
+          SKIP: mypy
+        run: |
+          uvx prek run --files src/pertpy/tools/__init__.py src/pertpy/tools/_perturbation_evaluator.py tests/tools/test_perturbation_evaluator.py docs/perturbation_evaluation.md docs/api/tools_index.md --show-diff-on-failure 2>&1 | tee "$GITHUB_WORKSPACE/project-results/precommit.txt"
+      - name: Full documentation build
+        if: always() && steps.install.outcome == 'success'
+        working-directory: /tmp/pertpy-contribution
+        run: |
+          uv run sphinx-build -M html docs docs/_build -W --keep-going 2>&1 | tee "$GITHUB_WORKSPACE/project-results/docs.txt"
+      - name: Preserve review evidence
+        if: always()
+        run: |
+          git -C /tmp/pertpy-contribution diff HEAD > project-results/contribution.patch
+          if [ -d /tmp/pertpy-contribution/.venv ]; then
+            uv pip freeze --python /tmp/pertpy-contribution/.venv/bin/python > project-results/environment.txt
+          fi
+          if [ -f /tmp/pertpy-contribution/docs/_build/html/perturbation_evaluation.html ]; then
+            cp /tmp/pertpy-contribution/docs/_build/html/perturbation_evaluation.html project-results/
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pertpy-project-checks-${{ github.run_id }}-${{ github.run_attempt }}
+          path: project-results/
+          if-no-files-found: error
+          retention-days: 30
