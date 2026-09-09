@@ -1,0 +1,72 @@
+name: Perturbation evaluator audit
+
+on:
+  push:
+    branches: [audit/perturbation-evaluator]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evaluator-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  evaluate:
+    if: github.repository == 'thantiklermcirony/pertpy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    env:
+      MPLBACKEND: Agg
+      NUMBA_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install actual package and test dependencies
+        id: install
+        run: |
+          uv venv
+          uv pip install -e '.[test]' ruff==0.16.4
+          mkdir -p audit-results
+          uv pip freeze > audit-results/environment.txt
+          git rev-parse HEAD > audit-results/source-commit.txt
+          .venv/bin/python -c "import pathlib, pertpy; print(pertpy.__file__); assert pathlib.Path(pertpy.__file__).resolve().is_relative_to(pathlib.Path('src').resolve()); assert hasattr(pertpy.tl, 'PerturbationEvaluator')"
+      - name: Lint contribution
+        run: |
+          .venv/bin/ruff check src/pertpy/tools/_perturbation_evaluator.py src/pertpy/tools/__init__.py tests/tools/test_perturbation_evaluator.py
+          .venv/bin/ruff format --check src/pertpy/tools/_perturbation_evaluator.py tests/tools/test_perturbation_evaluator.py
+      - name: Contributor and independent contract tests
+        run: |
+          .venv/bin/python -m pytest tests/tools/test_perturbation_evaluator.py tests/tools/independent_evaluator_test.py -v --junitxml=audit-results/evaluator.xml 2>&1 | tee audit-results/evaluator.txt
+      - name: Existing comparison regression tests
+        if: always() && steps.install.outcome != 'failure'
+        run: |
+          .venv/bin/python -m pytest tests/tools/_perturbation_space/test_comparison.py -v --junitxml=audit-results/regression.xml 2>&1 | tee audit-results/regression.txt
+      - name: Reproduce the Norman held-out-combination example
+        if: success() && matrix.python == '3.12'
+        run: |
+          .venv/bin/python tests/tools/download_figshare_norman.py
+          .venv/bin/python tests/tools/prepare_norman_subset.py tests/tools/Norman_2019.h5ad --output tests/tools/subset.h5ad
+          .venv/bin/python tests/tools/run_norman_evaluator.py tests/tools/subset.h5ad --output audit-results 2>&1 | tee audit-results/norman-run.txt
+      - name: Preserve validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pertpy-evaluator-linux-${{ matrix.python }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: audit-results/
+          if-no-files-found: error
+          retention-days: 30
