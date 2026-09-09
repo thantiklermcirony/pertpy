@@ -3,6 +3,10 @@ name: Perturbation evaluator audit
 on:
   push:
     branches: [audit/perturbation-evaluator]
+    paths:
+      - src/pertpy/tools/**
+      - tests/tools/**
+      - .github/workflows/evaluator-audit.yml
 
 permissions:
   contents: read

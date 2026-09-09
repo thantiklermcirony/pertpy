@@ -3,7 +3,12 @@ name: Evaluator project checks
 on:
   push:
     branches: [audit/perturbation-evaluator]
-    paths: [.github/workflows/evaluator-project-checks.yml]
+    paths:
+      - src/pertpy/tools/**
+      - tests/tools/test_perturbation_evaluator.py
+      - docs/perturbation_evaluation.md
+      - docs/api/tools_index.md
+      - .github/workflows/evaluator-project-checks.yml
 
 permissions:
   contents: read
