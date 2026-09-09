@@ -1,0 +1,22 @@
+{
+  "upstream_base": "5bf4acaa45af16b49d248e4986fe394344fafdf5",
+  "clean_contribution_commit": "4ebb42a3d0418225d73c74cf81007b137d75ab83",
+  "tested_audit_commit": "1ce7cab302b30077cc283fabc3cebd5c4a18c92b",
+  "contribution_and_audit_files_byte_identical": true,
+  "source_sha256": {
+    "src/pertpy/tools/__init__.py": "1b8d0274a9cc96d4aaaccd48d34bf54e11c12fd0cc6e9dcad8a32acf28f38a9a",
+    "src/pertpy/tools/_perturbation_evaluator.py": "beb273dba10e92bfa07244d9aa84acf7f25fc2cd5c395b59aeed8cbc6527c46b",
+    "tests/tools/test_perturbation_evaluator.py": "c2d947a806873b23bee5a0e41596fcfaf807c0db511e83a88e86ab3af541fea5",
+    "docs/perturbation_evaluation.md": "6110ad2abd0e8b1531548bb18b3e52beaf1f2c7f8c62b8461df790c6535be8cc",
+    "docs/api/tools_index.md": "1e428dfef1617d75324425f3194d7a1e78eab7af4e0a6d7dd64fad833c6a30aa"
+  },
+  "patch_sha256": "95b254a173d4910dd6b5f26d1727a8b5b3d27b435d2b97d4259dcd6d429a6299",
+  "runtime_run": "https://github.com/thantiklermcirony/pertpy/actions/runs/34415474373",
+  "project_checks_run": "https://github.com/thantiklermcirony/pertpy/actions/runs/34415474369",
+  "runtime_artifacts_sha256": {
+    "Python 3.12": "8af0e1fc9d85a39a29c5a28f0342d0b67aec7e8c337f393ad589ffb086f95703",
+    "Python 3.14": "95a0a4d52c5e47043a2991c4e3277f1894ceb8dbb82c80a594aedc6bf909c050"
+  },
+  "project_artifact_sha256": "dd07aad22e5f5a53a332d6aea96f63cd57645484e65ba3aef173378020a333d0",
+  "upstream_submission": "Pending user review; no upstream PR or issue comment submitted."
+}

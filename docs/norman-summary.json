@@ -1,0 +1,125 @@
+{
+  "source_url": "https://ndownloader.figshare.com/files/34027562",
+  "source_sha256": "b679c157fea550ef5be4dad91da9dff1f5d8287313ad3f3537f6cf14d4bcd434",
+  "shape": [
+    4553,
+    500
+  ],
+  "train_cells": 2953,
+  "test_cells": 1600,
+  "heldout_combinations": [
+    "DUSP9+MAPK1",
+    "CNN1+ETS2",
+    "MAP2K3+SLC38A2",
+    "FEV+MAP7D1",
+    "ELMSAN1+MAP2K3",
+    "KLF1+TGFBR2",
+    "PTPN12+ZBTB10",
+    "PTPN12+PTPN9"
+  ],
+  "component_mapping": {
+    "DUSP9+MAPK1": [
+      "DUSP9",
+      "MAPK1"
+    ],
+    "CNN1+ETS2": [
+      "CNN1",
+      "ETS2"
+    ],
+    "MAP2K3+SLC38A2": [
+      "MAP2K3",
+      "SLC38A2"
+    ],
+    "FEV+MAP7D1": [
+      "FEV",
+      "MAP7D1"
+    ],
+    "ELMSAN1+MAP2K3": [
+      "ELMSAN1",
+      "MAP2K3"
+    ],
+    "KLF1+TGFBR2": [
+      "KLF1",
+      "TGFBR2"
+    ],
+    "PTPN12+ZBTB10": [
+      "PTPN12",
+      "ZBTB10"
+    ],
+    "PTPN12+PTPN9": [
+      "PTPN12",
+      "PTPN9"
+    ]
+  },
+  "measurement": {
+    "input": "layers/counts",
+    "selected_count_values": "All finite, nonnegative and integer-valued.",
+    "normalization": "Per selected cell: divide by count sum over all 19018 archived genes, multiply 10000, natural log1p.",
+    "normalization_dtype": "float64",
+    "saved_X_dtype": "float32",
+    "source_X_max_absolute_difference_from_recomputed_log1p_10k": 3.607871548183539e-07,
+    "feature_selection": "Top 500 population variances on normalized training controls and singles only; gene-symbol tie-break.",
+    "inherited_processing_limit": "Source archive already filtered cells/genes globally. The 19018-gene universe is inherited; no claim of a raw-data benchmark free of all preprocessing leakage.",
+    "ignored_source_metadata": [
+      "highly_variable",
+      "leiden",
+      "PCA",
+      "UMAP",
+      "neighbors",
+      "all-data means and dispersions"
+    ],
+    "counts_layer_note": "Saved counts are only the selected genes; library_total_19018_genes preserves the full archived denominator. Do not renormalize using the 500-gene count sum."
+  },
+  "selection": {
+    "minimum_cells_per_combination_and_constituent": 50,
+    "maximum_combinations": 8,
+    "maximum_cells_per_condition": 200,
+    "condition_order": "SHA256(canonical UTF-8 perturbation label), tie by label",
+    "cell_order": "SHA256(original UTF-8 cell ID), tie by cell ID",
+    "quality_filter": "good_coverage == True; exclude problematic NegCtrl1 construct",
+    "good_coverage_false_source_cells": 6916,
+    "problematic_guide_source_cells": 2945,
+    "excluded_union_cells": 9701,
+    "eligible_source_cells": 101554,
+    "eligible_combinations": 131,
+    "guide_to_label_validation": "All source rows match the two-position guide grammar after removing NegCtrl tokens and sorting genes.",
+    "guide_pooling": "Pool constructs with the same intended unordered gene intervention; retain original guide_identity and gemgroup.",
+    "problematic_guide": "NegCtrl1_NegCtrl0__NegCtrl1_NegCtrl0",
+    "exclusion_source": "https://raw.githubusercontent.com/theislab/sc-pert/main/datasets/Norman_2019_curation.ipynb"
+  },
+  "limitations": [
+    "Software demonstration only; no model superiority or biological discovery claim.",
+    "Single K562 context; 10X gemgroup lanes are not independent biological replicates.",
+    "Point predictions describe means, not a generative distribution.",
+    "No source precomputed DEG lists or outcome-dependent condition selection used."
+  ],
+  "score_rows": 80,
+  "status_counts": {
+    "ok": 64,
+    "undefined_constant": 8,
+    "no_rankable_effect": 8
+  },
+  "independent_numerical_checks": 32,
+  "gene_order_invariance_check": "passed",
+  "additive_lower_mse_groups": 7,
+  "total_groups": 8,
+  "macro_mean_mse": {
+    "baseline:control_mean": 0.033486002072450886,
+    "baseline:additive": 0.010829186185426904
+  },
+  "macro_mean_delta_pearson_additive": 0.8974714352246015,
+  "data_redistributed": false,
+  "package_file": "/home/runner/work/pertpy/pertpy/src/pertpy/__init__.py",
+  "versions": {
+    "pertpy": "0.1.dev1279+g1ce7cab30",
+    "anndata": "0.14.0.dev55+g2e7b0da7d",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "h5py": "3.16.0"
+  },
+  "scripts_sha256": {
+    "run_norman_evaluator.py": "b4b43fafac1b3c16bcef4b2a3d3998d8215fc0c165d3ad7d7ac6e68e7799de6f",
+    "prepare_norman_subset.py": "5985ca95af1aa768e74ec6c826ad2ead830b2fb7c91f572079097f0650b3589c"
+  }
+}

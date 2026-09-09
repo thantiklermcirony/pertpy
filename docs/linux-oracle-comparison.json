@@ -1,0 +1,199 @@
+{
+  "checks": 32,
+  "status": "passed",
+  "max_absolute_difference": 2.220446049250313e-16,
+  "details": [
+    {
+      "perturbation": "CNN1+ETS2",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 0.0
+    },
+    {
+      "perturbation": "CNN1+ETS2",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "CNN1+ETS2",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 3.469446951953614e-18
+    },
+    {
+      "perturbation": "CNN1+ETS2",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 0.0
+    },
+    {
+      "perturbation": "DUSP9+MAPK1",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 5.204170427930421e-18
+    },
+    {
+      "perturbation": "DUSP9+MAPK1",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "DUSP9+MAPK1",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 1.3877787807814457e-17
+    },
+    {
+      "perturbation": "DUSP9+MAPK1",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 0.0
+    },
+    {
+      "perturbation": "ELMSAN1+MAP2K3",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 0.0
+    },
+    {
+      "perturbation": "ELMSAN1+MAP2K3",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "ELMSAN1+MAP2K3",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 6.071532165918825e-18
+    },
+    {
+      "perturbation": "ELMSAN1+MAP2K3",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 1.1102230246251565e-16
+    },
+    {
+      "perturbation": "FEV+MAP7D1",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 3.469446951953614e-17
+    },
+    {
+      "perturbation": "FEV+MAP7D1",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "FEV+MAP7D1",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 3.8163916471489756e-17
+    },
+    {
+      "perturbation": "FEV+MAP7D1",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 2.220446049250313e-16
+    },
+    {
+      "perturbation": "KLF1+TGFBR2",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 3.469446951953614e-18
+    },
+    {
+      "perturbation": "KLF1+TGFBR2",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "KLF1+TGFBR2",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 1.734723475976807e-18
+    },
+    {
+      "perturbation": "KLF1+TGFBR2",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 2.220446049250313e-16
+    },
+    {
+      "perturbation": "MAP2K3+SLC38A2",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 6.938893903907228e-18
+    },
+    {
+      "perturbation": "MAP2K3+SLC38A2",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "MAP2K3+SLC38A2",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 1.3877787807814457e-17
+    },
+    {
+      "perturbation": "MAP2K3+SLC38A2",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 1.1102230246251565e-16
+    },
+    {
+      "perturbation": "PTPN12+PTPN9",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 0.0
+    },
+    {
+      "perturbation": "PTPN12+PTPN9",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "PTPN12+PTPN9",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 5.204170427930421e-18
+    },
+    {
+      "perturbation": "PTPN12+PTPN9",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 1.1102230246251565e-16
+    },
+    {
+      "perturbation": "PTPN12+ZBTB10",
+      "model": "baseline:control_mean",
+      "metric": "mse",
+      "absolute_difference": 6.938893903907228e-18
+    },
+    {
+      "perturbation": "PTPN12+ZBTB10",
+      "model": "baseline:control_mean",
+      "metric": "delta_pearson",
+      "absolute_difference": null
+    },
+    {
+      "perturbation": "PTPN12+ZBTB10",
+      "model": "baseline:additive",
+      "metric": "mse",
+      "absolute_difference": 8.673617379884035e-18
+    },
+    {
+      "perturbation": "PTPN12+ZBTB10",
+      "model": "baseline:additive",
+      "metric": "delta_pearson",
+      "absolute_difference": 0.0
+    }
+  ]
+}
