@@ -296,3 +296,16 @@ def test_delta_pearson_preserves_scale_invariance(magnitude):
     actual = value(scores, "model", "delta_pearson")
     assert actual.status == "ok"
     assert actual.value == pytest.approx(1)
+
+
+@pytest.mark.parametrize("storage", [np.asarray, sparse.csr_matrix])
+def test_float32_control_reduction_matches_independent_float64(storage):
+    values = np.array([[0.1, 1.3], [0.2, 2.7], [0.3, 3.1]], dtype=np.float32)
+    train = cells(values, ["ctrl"] * 3, "train")
+    train.X = storage(values)
+    truth = cells([[0, 0]], ["A+B"], "test")
+    scores = pt.tl.PerturbationEvaluator("condition", "ctrl").evaluate(
+        truth, {}, train=train, baselines=("control_mean",), metrics=("mse",)
+    )
+    expected = np.mean(values.astype(np.float64).mean(axis=0) ** 2)
+    np.testing.assert_allclose(value(scores, "baseline:control_mean", "mse").value, expected, rtol=1e-14)
