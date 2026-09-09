@@ -5,9 +5,10 @@ with simple baselines, catches misleading comparisons, and preserves failed or
 undefined scores. It is a concrete response to the evaluation infrastructure
 requested in [Pertpy issue #1035](https://github.com/scverse/pertpy/issues/1035).
 
-The [clean contribution is live on GitHub](https://github.com/thantiklermcirony/pertpy/tree/feat/perturbation-evaluator).
-It has not been submitted upstream; it is ready for the user's review of the
-resolution before submission. No maintainer acceptance or merge is claimed.
+The [contribution is submitted as Pertpy PR #1098](https://github.com/scverse/pertpy/pull/1098)
+for maintainer review. The tested implementation is committed on the
+[clean feature branch](https://github.com/thantiklermcirony/pertpy/tree/feat/perturbation-evaluator).
+No maintainer acceptance or merge is claimed.
 
 **What researchers get.** `pt.tl.PerturbationEvaluator` provides explicit
 perturbation, combination and context holdouts; gene alignment by identifier;

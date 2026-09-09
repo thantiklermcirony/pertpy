@@ -1,3 +1,8 @@
+# Archived submission draft
+
+Submitted as [Pertpy PR #1098](https://github.com/scverse/pertpy/pull/1098).
+The live pull request is the current review record; this file preserves the draft.
+
 Title: Add baseline-aware evaluator for perturbation predictions
 
 Relates to #1035. Comparing perturbation predictions currently requires callers

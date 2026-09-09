@@ -18,5 +18,6 @@
     "Python 3.14": "95a0a4d52c5e47043a2991c4e3277f1894ceb8dbb82c80a594aedc6bf909c050"
   },
   "project_artifact_sha256": "dd07aad22e5f5a53a332d6aea96f63cd57645484e65ba3aef173378020a333d0",
-  "upstream_submission": "Pending user review; no upstream PR or issue comment submitted."
+  "upstream_submission": "Submitted for maintainer review; not merged.",
+  "upstream_pull_request": "https://github.com/scverse/pertpy/pull/1098"
 }
