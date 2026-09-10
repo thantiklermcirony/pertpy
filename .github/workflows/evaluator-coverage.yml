@@ -1,0 +1,75 @@
+name: Evaluator coverage follow-up
+
+on:
+  push:
+    branches: [audit/evaluator-coverage-followup]
+    paths:
+      - tests/tools/test_perturbation_evaluator.py
+      - .github/workflows/evaluator-coverage.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evaluator-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+jobs:
+  contracts:
+    if: github.repository == 'thantiklermcirony/pertpy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    env:
+      MPLBACKEND: Agg
+      NUMBA_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install actual package and preserve provenance
+        run: |
+          uv venv
+          uv pip install -e '.[test]' ruff==0.16.4
+          mkdir -p coverage-results
+          uv pip freeze > coverage-results/environment.txt
+          git rev-parse HEAD > coverage-results/source-commit.txt
+          sha256sum tests/tools/test_perturbation_evaluator.py src/pertpy/tools/_perturbation_evaluator.py > coverage-results/source-sha256.txt
+          .venv/bin/python -c "import pathlib, pertpy; print(pertpy.__file__); assert pathlib.Path(pertpy.__file__).resolve().is_relative_to(pathlib.Path('src').resolve())"
+          git show 4ebb42a3d0418225d73c74cf81007b137d75ab83:src/pertpy/tools/_perturbation_evaluator.py > coverage-results/original-implementation.py
+          cmp coverage-results/original-implementation.py src/pertpy/tools/_perturbation_evaluator.py
+          git show 4ebb42a3d0418225d73c74cf81007b137d75ab83:tests/tools/test_perturbation_evaluator.py > tests/tools/_coverage_baseline_evaluator.py
+      - name: Lint the maintained test file
+        run: |
+          .venv/bin/ruff check tests/tools/test_perturbation_evaluator.py
+          .venv/bin/ruff format --check tests/tools/test_perturbation_evaluator.py
+      - name: Measure the original maintained tests
+        run: |
+          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-before --source=pertpy.tools._perturbation_evaluator -m pytest tests/tools/_coverage_baseline_evaluator.py -q --junitxml=coverage-results/before.xml 2>&1 | tee coverage-results/before.txt
+          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-before -o coverage-results/before.json
+          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-before -m | tee coverage-results/before-coverage.txt
+      - name: Measure the updated maintained tests
+        run: |
+          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-after --source=pertpy.tools._perturbation_evaluator -m pytest tests/tools/test_perturbation_evaluator.py -q --junitxml=coverage-results/after.xml 2>&1 | tee coverage-results/after.txt
+          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-after -o coverage-results/after.json
+          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-after -m | tee coverage-results/after-coverage.txt
+      - name: Preserve evidence even if a test fails
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pertpy-coverage-${{ matrix.python }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage-results/
+          if-no-files-found: error
+          retention-days: 30
