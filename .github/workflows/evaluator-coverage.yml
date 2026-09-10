@@ -57,14 +57,70 @@ jobs:
           .venv/bin/ruff format --check tests/tools/test_perturbation_evaluator.py
       - name: Measure the original maintained tests
         run: |
-          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-before --source=pertpy.tools._perturbation_evaluator -m pytest tests/tools/_coverage_baseline_evaluator.py -q --junitxml=coverage-results/before.xml 2>&1 | tee coverage-results/before.txt
-          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-before -o coverage-results/before.json
-          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-before -m | tee coverage-results/before-coverage.txt
+          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-before --source=src/pertpy -m pytest tests/tools/_coverage_baseline_evaluator.py -q --junitxml=coverage-results/before.xml 2>&1 | tee coverage-results/before.txt
+          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-before --include='*/_perturbation_evaluator.py' -o coverage-results/before.json
+          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-before --include='*/_perturbation_evaluator.py' -m | tee coverage-results/before-coverage.txt
       - name: Measure the updated maintained tests
         run: |
-          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-after --source=pertpy.tools._perturbation_evaluator -m pytest tests/tools/test_perturbation_evaluator.py -q --junitxml=coverage-results/after.xml 2>&1 | tee coverage-results/after.txt
-          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-after -o coverage-results/after.json
-          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-after -m | tee coverage-results/after-coverage.txt
+          .venv/bin/python -m coverage run --data-file=coverage-results/.coverage-after --source=src/pertpy -m pytest tests/tools/test_perturbation_evaluator.py -q --junitxml=coverage-results/after.xml 2>&1 | tee coverage-results/after.txt
+          .venv/bin/python -m coverage json --data-file=coverage-results/.coverage-after --include='*/_perturbation_evaluator.py' -o coverage-results/after.json
+          .venv/bin/python -m coverage report --data-file=coverage-results/.coverage-after --include='*/_perturbation_evaluator.py' -m | tee coverage-results/after-coverage.txt
+      - name: Summarize measured tests and coverage
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          base = Path('coverage-results')
+          lines = [
+              '## Evaluator coverage follow-up',
+              'Python: ${{ matrix.python }}',
+              '',
+              '| Suite | Tests | Failures | Errors | Skipped | Covered / statements | Coverage |',
+              '|---|---:|---:|---:|---:|---:|---:|',
+          ]
+          missing = {}
+          for phase in ('before', 'after'):
+              xml_path, json_path = base / f'{phase}.xml', base / f'{phase}.json'
+              counts = ['unavailable'] * 4
+              if xml_path.exists():
+                  suites = ET.parse(xml_path).getroot().findall('.//testsuite')
+                  counts = [str(sum(int(suite.get(key, '0')) for suite in suites))
+                            for key in ('tests', 'failures', 'errors', 'skipped')]
+              covered, percent = 'unavailable', 'unavailable'
+              if json_path.exists():
+                  files = json.loads(json_path.read_text())['files']
+                  target = [value for name, value in files.items()
+                            if name.replace('\\', '/').endswith('/_perturbation_evaluator.py')]
+                  if len(target) != 1:
+                      raise ValueError('Expected exactly one evaluator coverage entry')
+                  summary = target[0]['summary']
+                  covered = f"{summary['covered_lines']} / {summary['num_statements']}"
+                  percent = f"{summary['percent_covered']:.2f}%"
+                  missing[phase] = set(target[0]['missing_lines'])
+              lines.append('| ' + ' | '.join([phase, *counts, covered, percent]) + ' |')
+          for phase, numbers in missing.items():
+              lines.extend(['', f'{phase} missed lines: ' + ', '.join(map(str, sorted(numbers)))])
+          if 'before' in missing and 'after' in missing:
+              lines.extend(['', 'Newly covered lines: ' + ', '.join(map(str, sorted(missing['before'] - missing['after'])))])
+          test_file = Path('tests/tools/test_perturbation_evaluator.py')
+          if test_file.exists():
+              digest = hashlib.sha256(test_file.read_bytes()).hexdigest()
+              lines.extend(['', f'Test file SHA256: `{digest}`'])
+          commit_file = base / 'source-commit.txt'
+          if commit_file.exists():
+              lines.extend(['', f'Fork source commit: `{commit_file.read_text().strip()}`'])
+          lines.extend(['', 'Unavailable means no valid measurement was produced; see preserved logs.'])
+          summary_text = '\n'.join(lines) + '\n'
+          base.mkdir(exist_ok=True)
+          (base / 'summary.md').write_text(summary_text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write(summary_text)
+          PY
       - name: Preserve evidence even if a test fails
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
